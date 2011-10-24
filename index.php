@@ -1,16 +1,18 @@
 <?php
 require_once 'google-api/apiClient.php';
 require_once 'google-api/contrib/apiPlusService.php';
+require_once 'api_config.php';
+
 session_start();
 
 $client = new apiClient();
 $client->setApplicationName('Google+ PHP Starter Application');
 // Visit https://code.google.com/apis/console?api=plus to generate your
 // client id, client secret, and to register your redirect uri.
-$client->setClientId('place-client-id');
-$client->setClientSecret('place-client-secret');
-$client->setRedirectUri('redirect-uri');
-$client->setDeveloperKey('developer-key');
+$client->setClientId($CLIENT_ID);
+$client->setClientSecret($CLIENT_SECRET);
+$client->setRedirectUri($REDIRECT_URI);
+$client->setDeveloperKey($DEVELOPER_KEY);
 $plus = new apiPlusService($client);
 
 if (isset($_REQUEST['logout'])) {
@@ -57,11 +59,37 @@ if ($client->getAccessToken()) {
 ?>
 <!doctype html>
 <html>
-<head><link rel='stylesheet' href='style.css' /></head>
+<head>
+	<link rel='stylesheet' href='style.css' />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script type="text/javascript">
+		var me = {
+			id: '<?php echo $me['id']; ?>',
+			developerKey: '<?php echo $DEVELOPER_KEY; ?>',
+			url: '<?php echo $url; ?>',
+			image: '<?php echo $image; ?>',
+			name: '<?php echo $name; ?>'
+		};
+		//called when the document is ready, this initializes jQuery
+		$(function(){
+			$("a").click(function(){
+				//call Google+ api using jQuery ajax
+				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+me.id,
+						data:{key:me.developerKey,
+							prettyprint:false,
+							fields:"displayName,image,tagline,url"},
+						success: function(data){ console.log(data)},
+						cache:true,
+						dataType:"jsonp"})					
+			});
+		});		
+	</script>
+</head>
 <body>
-<header><h1>Google+ Sample App</h1></header>
+<header><h1>Round Circles</h1></header>
 <div class="box">
-
+<a href="#">Click me</a>
+<br/>
 <?php if(isset($personMarkup)): ?>
 <div class="me"><?php print $personMarkup ?></div>
 <?php endif ?>
