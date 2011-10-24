@@ -63,26 +63,61 @@ if ($client->getAccessToken()) {
 	<link rel='stylesheet' href='style.css' />
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 	<script type="text/javascript">
-		var me = {
+		/*var me = {
 			id: '<?php echo $me['id']; ?>',
 			developerKey: '<?php echo $DEVELOPER_KEY; ?>',
 			url: '<?php echo $url; ?>',
-			image: '<?php echo $image; ?>',
+			image: '<?php echo $img; ?>',
 			name: '<?php echo $name; ?>'
 		};
+		*/
+	
+		function User(data){
+	        var properties = {
+	            id: data.id,
+	            name: data.name,
+	            developerKey: data.developerKey,
+	            image: data.img,
+	            url: data.url                
+	        };
+
+	        this.getUserProperties = function(){
+				return properties;
+	        };
+	    }
+	    
+	    var user = new User({
+		    id: '<?php echo $me['id']; ?>', 
+		    name: '<?php echo $name; ?>', 
+		    developerKey: '<?php echo $DEVELOPER_KEY; ?>', 
+		    image: '<?php echo $img; ?>', 
+		    url: '<?php echo $url; ?>'
+		    });
+
+		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
 			$("a").click(function(){
 				//call Google+ api using jQuery ajax
-				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+me.id,
-						data:{key:me.developerKey,
+				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
+						data:{key:user.developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
-						success: function(data){ console.log(data)},
+						success: function(data){ console.log(data); populate();},
 						cache:true,
 						dataType:"jsonp"})					
 			});
 		});		
+
+		function populate(){
+			<?php if(isset($personMarkup)): ?>
+			<div class="me"><?php print $personMarkup ?></div>
+			<?php endif ?>
+	
+			<?php if(isset($activityMarkup)): ?>
+			<div class="activities">Your Activities: <?php print $activityMarkup ?></div>
+			<?php endif ?>
+		}
 	</script>
 </head>
 <body>
@@ -90,13 +125,9 @@ if ($client->getAccessToken()) {
 <div class="box">
 <a href="#">Click me</a>
 <br/>
-<?php if(isset($personMarkup)): ?>
-<div class="me"><?php print $personMarkup ?></div>
-<?php endif ?>
 
-<?php if(isset($activityMarkup)): ?>
-<div class="activities">Your Activities: <?php print $activityMarkup ?></div>
-<?php endif ?>
+<div id="container"></div>
+
 
 <?php
   if(isset($authUrl)) {
