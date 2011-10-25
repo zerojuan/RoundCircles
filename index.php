@@ -48,7 +48,8 @@ if ($client->getAccessToken()) {
     $url = filter_var($activity['url'], FILTER_VALIDATE_URL);
     $title = filter_var($activity['title'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
     $content = filter_var($activity['object']['content'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-    $activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
+    //$activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
+    $activityMarkup .= "\"".$url."\",\n";
   }
 
   // The access token may have been updated lazily.
@@ -94,6 +95,11 @@ if ($client->getAccessToken()) {
 		    url: '<?php echo $url; ?>'
 		    });
 
+		var urls = <?php print "[".$activityMarkup."]" ?>;
+
+		function formatUrl(info){
+			return info.substring(0,info.lastIndexOf(","));
+		};
 		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
@@ -107,8 +113,8 @@ if ($client->getAccessToken()) {
 						success: function(data){ 
 									console.log(data); 
 									var str = '';
-									$.each(data, function(key, value){
-										str += value;
+									$.each(urls, function(key, value){
+										str += (value + "\n");
 									});
 									$("#container").html(str); 
 								},
@@ -135,7 +141,7 @@ if ($client->getAccessToken()) {
 <?php //endif ?>
 
 <?php //if(isset($activityMarkup)): ?>
-<div class="activities">Your Activities: <?php //print $activityMarkup ?></div>
+<!-- div class="activities">Your Activities: <?php //print $activityMarkup ?></div -->
 <?php //endif ?>
 
 
