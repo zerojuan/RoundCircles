@@ -100,24 +100,23 @@ if ($client->getAccessToken()) {
 			$("a").click(function(){
 				//call Google+ api using jQuery ajax
 				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
+						type:"GET",
 						data:{key:user.developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
-						success: function(data){ console.log(data); populate();},
+						success: function(data){ 
+									console.log(data); 
+									var str = '';
+									$.each(data, function(key, value){
+										str += value;
+									});
+									$("#container").html(str); 
+								},
 						cache:true,
 						dataType:"jsonp"})					
 			});
 		});		
 
-		function populate(){
-			<?php if(isset($personMarkup)): ?>
-			<div class="me"><?php print $personMarkup ?></div>
-			<?php endif ?>
-	
-			<?php if(isset($activityMarkup)): ?>
-			<div class="activities">Your Activities: <?php print $activityMarkup ?></div>
-			<?php endif ?>
-		}
 	</script>
 </head>
 <body>
@@ -129,6 +128,17 @@ if ($client->getAccessToken()) {
 <div id="container"></div>
 
 
+
+
+<?php //if(isset($personMarkup)): ?>
+<div class="me"><?php //print $personMarkup ?></div>
+<?php //endif ?>
+
+<?php //if(isset($activityMarkup)): ?>
+<div class="activities">Your Activities: <?php //print $activityMarkup ?></div>
+<?php //endif ?>
+
+
 <?php
   if(isset($authUrl)) {
     print "<a class='login' href='$authUrl'>Connect Me!</a>";
@@ -136,6 +146,8 @@ if ($client->getAccessToken()) {
    print "<a class='logout' href='?logout'>Logout</a>";
   }
 ?>
+
+
 </div>
 </body>
 </html>
