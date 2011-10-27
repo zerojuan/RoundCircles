@@ -42,14 +42,14 @@ if ($client->getAccessToken()) {
   $optParams = array('maxResults' => 100);
   $activities = $plus->activities->listActivities('me', 'public', $optParams);
   $activityMarkup = '';
+  
   foreach($activities['items'] as $activity) {
     // These fields are currently filtered through the PHP sanitize filters.
     // See http://www.php.net/manual/en/filter.filters.sanitize.php
     $url = filter_var($activity['url'], FILTER_VALIDATE_URL);
     $title = filter_var($activity['title'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
     $content = filter_var($activity['object']['content'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-    //$activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
-    $activityMarkup .= "\"".$url."\",\n";
+    $activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
   }
 
   // The access token may have been updated lazily.
@@ -63,87 +63,67 @@ if ($client->getAccessToken()) {
 <head>
 	<link rel='stylesheet' href='style.css' />
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script type="text/javascript" src="scripts/User.js"></script>
 	<script type="text/javascript">
-		/*var me = {
+		//set a user object
+		var user = new User({
 			id: '<?php echo $me['id']; ?>',
 			developerKey: '<?php echo $DEVELOPER_KEY; ?>',
 			url: '<?php echo $url; ?>',
 			image: '<?php echo $img; ?>',
 			name: '<?php echo $name; ?>'
-		};
-		*/
-	
-		function User(data){
-	        var properties = {
-	            id: data.id,
-	            name: data.name,
-	            developerKey: data.developerKey,
-	            image: data.img,
-	            url: data.url                
-	        };
-
-	        this.getUserProperties = function(){
-				return properties;
-	        };
-	    }
-	    
-	    var user = new User({
-		    id: '<?php echo $me['id']; ?>', 
-		    name: '<?php echo $name; ?>', 
-		    developerKey: '<?php echo $DEVELOPER_KEY; ?>', 
-		    image: '<?php echo $img; ?>', 
-		    url: '<?php echo $url; ?>'
-		    });
-
-		var urls = <?php print "[".$activityMarkup."]" ?>;
-
-		function formatUrl(info){
-			return info.substring(0,info.lastIndexOf(","));
-		};
+		});
 		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
-			$("a").click(function(){
+			$("#me").click(function(){
 				//call Google+ api using jQuery ajax
-				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
-						type:"GET",
-						data:{key:user.developerKey,
+				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.getUserProperties().id,
+						data:{key:user.getUserProperties().developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
 						success: function(data){ 
-									console.log(data); 
-									var str = '';
-									$.each(urls, function(key, value){
-										str += (value + "\n");
-									});
-									$("#container").html(str); 
-								},
+							console.log(data)
+							var str = '';
+							$.each(data, function(key, value){
+								if(typeof value !== "object"){ //only displays the data that is not an Object
+								 	str += (key + ":" + value + "\n");
+								}
+							});
+							$("#myContainer").html(str); 
+							},
 						cache:true,
 						dataType:"jsonp"})					
 			});
-		});		
 
+			$("#other").click(function(){
+				var url = "https://www.googleapis.com/plus/v1/people?query=i"; //query set to 'i'
+				$.get(url, function(data){ 
+							console.log(data)
+							var str = '';
+							$.each(data, function(key, value){
+								if(typeof value !== "object"){ //only displays the data that is not an Object
+								 	str += (key + ":" + value + "\n");
+								}
+							});
+							$("#otherContainer").html(str);
+				}
+					,"jsonp")					
+			});
+		});		
 	</script>
 </head>
 <body>
 <header><h1>Round Circles</h1></header>
 <div class="box">
-<a href="#">Click me</a>
+<a href="#" id="me">Get Me</a>
 <br/>
 
-<div id="container"></div>
+<div id="myContainer"></div>
 
+<a href="#" id="other">Get Others</a>
 
-
-
-<?php //if(isset($personMarkup)): ?>
-<div class="me"><?php //print $personMarkup ?></div>
-<?php //endif ?>
-
-<?php //if(isset($activityMarkup)): ?>
-<!-- div class="activities">Your Activities: <?php //print $activityMarkup ?></div -->
-<?php //endif ?>
-
+<div id="otherContainer"></div>
 
 <?php
   if(isset($authUrl)) {
@@ -152,8 +132,6 @@ if ($client->getAccessToken()) {
    print "<a class='logout' href='?logout'>Logout</a>";
   }
 ?>
-
-
 </div>
 </body>
 </html>
