@@ -78,8 +78,8 @@ if ($client->getAccessToken()) {
 		$(function(){
 			$("#me").click(function(){
 				//call Google+ api using jQuery ajax
-				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.getUserProperties().id,
-						data:{key:user.getUserProperties().developerKey,
+				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
+						data:{key:user.developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
 						success: function(data){ 
@@ -97,8 +97,14 @@ if ($client->getAccessToken()) {
 			});
 
 			$("#other").click(function(){
-				var url = "https://www.googleapis.com/plus/v1/people?query=i"; //query set to 'i'
-				$.get(url, function(data){ 
+				var input = $("#query").val();
+				//call Google+ api using jQuery ajax
+				$.ajax({url:"https://www.googleapis.com/plus/v1/people",
+						data:{key:user.developerKey,
+							prettyprint:false,
+							query:input,
+							fields:"nextPageToken,title"},
+						success: function(data){ 
 							console.log(data)
 							var str = '';
 							$.each(data, function(key, value){
@@ -106,9 +112,10 @@ if ($client->getAccessToken()) {
 								 	str += (key + ":" + value + "\n");
 								}
 							});
-							$("#otherContainer").html(str);
-				}
-					,"jsonp")					
+							$("#otherContainer").html(str); 
+							},
+						cache:true,
+						dataType:"jsonp"})					
 			});
 		});		
 	</script>
@@ -121,6 +128,8 @@ if ($client->getAccessToken()) {
 
 <div id="myContainer"></div>
 
+<input type="text" id="query"></input>
+<br/>
 <a href="#" id="other">Get Others</a>
 
 <div id="otherContainer"></div>
