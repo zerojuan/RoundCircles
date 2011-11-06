@@ -74,73 +74,66 @@ if ($client->getAccessToken()) {
 			name: '<?php echo $name; ?>'
 		});
 		
-		//called when the document is ready, this initializes jQuery
-		$(function(){
-			$("#me").click(function(){
-				//call Google+ api using jQuery ajax
-				$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
+		function showLoggedInUser(data){
+			var thumb = "<img src='"+ data.image.url + "?sz=30'/>";
+			var logout = "<a class='logout' href='?logout'>Logout</a>";
+			$("#userBar").html(user.name + "&nbsp;" + logout + "&nbsp" + thumb);
+		}
+		
+		function showSearchResults(data){
+			console.log(data);
+		}
+		
+		function requestMyUserData(callback){
+			$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
 						data:{key:user.developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
-						success: function(data){ 
-							console.log(data)
-							var str = '';
-							$.each(data, function(key, value){
-								if(typeof value !== "object"){ //only displays the data that is not an Object
-								 	str += (key + ":" + value + "\n");
-								}
-							});
-							$("#myContainer").html(str); 
-							},
+						success: callback,
 						cache:true,
-						dataType:"jsonp"})					
-			});
-
-			$("#other").click(function(){
-				var input = $("#query").val();
-				//call Google+ api using jQuery ajax
-				$.ajax({url:"https://www.googleapis.com/plus/v1/people",
+						dataType:"jsonp"})
+		}
+		
+		function requestSearchUsers(query, callback){
+			$.ajax({url:"https://www.googleapis.com/plus/v1/people",
 						data:{key:user.developerKey,
 							prettyprint:false,
-							query:input,
+							query:query,
 							fields:"nextPageToken,title"},
-						success: function(data){ 
-							console.log(data)
-							var str = '';
-							$.each(data, function(key, value){
-								if(typeof value !== "object"){ //only displays the data that is not an Object
-								 	str += (key + ":" + value + "\n");
-								}
-							});
-							$("#otherContainer").html(str); 
-							},
+						success: callback,
 						cache:true,
-						dataType:"jsonp"})					
+						dataType:"jsonp"})
+		}
+		//called when the document is ready, this initializes jQuery
+		$(function(){
+			requestMyUserData(showLoggedInUser);
+
+			$("#other").click(function(){
+				var input = "'" + $("#query").val() + "'";
+				requestSearchUsers(input, showSearchResults);					
 			});
 		});		
 	</script>
 </head>
 <body>
-<header><h1>Round Circles</h1></header>
-<div class="box">
-<a href="#" id="me">Get Me</a>
-<br/>
-
-<div id="myContainer"></div>
-
-<input type="text" id="query"></input>
-<br/>
-<a href="#" id="other">Get Others</a>
-
-<div id="otherContainer"></div>
 
 <?php
   if(isset($authUrl)) {
-    print "<a class='login' href='$authUrl'>Connect Me!</a>";
+  ?>
+	<header><h1>Round Circles</h1></header>
+    <div class='box'> <a class='login' href='<?php print $authUrl ?>'>Connect Me!</a> </div>
+  <?php
   } else {
-   print "<a class='logout' href='?logout'>Logout</a>";
+  ?>
+	<header><h1>Round Circles</h1> <div id="userBar"></div></header>
+	<input type="text" id="query"></input>
+	<a href="#" id="other">Get Others</a>
+	<div id="otherContainer"></div>
+	
+	
+  <?php
   }
 ?>
-</div>
+
 </body>
 </html>
