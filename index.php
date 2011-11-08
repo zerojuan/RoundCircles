@@ -42,6 +42,7 @@ if ($client->getAccessToken()) {
   $optParams = array('maxResults' => 100);
   $activities = $plus->activities->listActivities('me', 'public', $optParams);
   $activityMarkup = '';
+  $activityUrls = array();
   
   foreach($activities['items'] as $activity) {
     // These fields are currently filtered through the PHP sanitize filters.
@@ -50,8 +51,10 @@ if ($client->getAccessToken()) {
     $title = filter_var($activity['title'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
     $content = filter_var($activity['object']['content'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
     $activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
+    array_push($activityUrls, $url); // get urls and store in array
   }
-
+  //print_r($activityUrls);
+  
   // The access token may have been updated lazily.
   $_SESSION['access_token'] = $client->getAccessToken();
 } else {
@@ -104,9 +107,20 @@ if ($client->getAccessToken()) {
 						cache:true,
 						dataType:"jsonp"})
 		}
+
+		function showActivityUrls(){
+			var urls = JSON.parse('<?php echo json_encode($activityUrls); ?>'); // this is how it is to pass PHP array to javascript
+			$.each(urls, function(key, value){
+				$("#activityUrls").append("<li>" + value + "</li>");
+				console.log(value);
+			});
+		}
+		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
 			requestMyUserData(showLoggedInUser);
+
+			showActivityUrls();
 
 			$("#other").click(function(){
 				var input = "'" + $("#query").val() + "'";
@@ -129,7 +143,7 @@ if ($client->getAccessToken()) {
 	<input type="text" id="query"></input>
 	<a href="#" id="other">Get Others</a>
 	<div id="otherContainer"></div>
-	
+	<ul id="activityUrls"></ul>
 	
   <?php
   }
