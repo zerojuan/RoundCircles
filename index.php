@@ -107,12 +107,36 @@ if ($client->getAccessToken()) {
 						cache:true,
 						dataType:"jsonp"})
 		}
+		
+		function requestPlusOnersFromActivity(activityId, callback){
+			$.ajax({url:"https://www.googleapis.com/plus/v1/activities/"+activityId+"/people/plusoners",
+					data:{key:user.developerKey,
+						maxResults: 20,
+						prettyprint:false},
+					success: callback,
+					cache: true,
+					dataType:"jsonp"
+					});
+		}
 
 		function showActivityUrls(){
-			var urls = JSON.parse('<?php echo json_encode($activityUrls); ?>'); // this is how it is to pass PHP array to javascript
-			$.each(urls, function(key, value){
-				$("#activityUrls").append("<li>" + value + "</li>");
-				console.log(value);
+			//you don't have to decode, because the echoed value is a valid json string
+			var activities = <?php echo json_encode($activities); ?>; 
+			// activityURLs only contain the URLs, not the data of the activities
+			console.log(activities);
+			$.each(activities.items, function(key, value){
+				var displayName = '(No title)'
+				//some values don't have attachments, so I check if it is defined first, because it will cause an error that breaks jquery
+				if(value.object.attachments){
+					displayName = value.object.attachments['0'].displayName
+				}else{
+					//try to look for other values that I can display (check the console log in chrome)
+				}	
+				
+				//I append the id to the a's id. So that I can easily find it in jquery
+				$("#activityUrls").append("<li>" + displayName +" "
+								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
+								+"</li>");
 			});
 		}
 		
@@ -122,6 +146,21 @@ if ($client->getAccessToken()) {
 
 			showActivityUrls();
 
+			$(".view-people").click(function(e){
+				//cancel default behaviour
+				e.preventDefault();
+
+				//call the ajax request, I retrieve the id from e.target, 'target' is the element that dispatched this click event
+				requestPlusOnersFromActivity(e.target.id, function(data){
+					if(data.items.length > 0){
+						$(e.target).append("<b> &nbsp Plus oned by </b> "+ data.items.length +" people");
+					}else{
+						$(e.target).append("<b> No one plus oned this");
+					}
+					console.log(data);
+				});
+			});
+			
 			$("#other").click(function(){
 				var input = "'" + $("#query").val() + "'";
 				requestSearchUsers(input, showSearchResults);					
