@@ -119,6 +119,11 @@ if ($client->getAccessToken()) {
 					});
 		}
 
+		function showUserImg(data){
+			var thumb = "<img src='"+ data + "?sz=30'/> &nbsp ";
+			return thumb;
+		}
+		
 		function showActivityUrls(){
 			//you don't have to decode, because the echoed value is a valid json string
 			var activities = <?php echo json_encode($activities); ?>; 
@@ -126,17 +131,26 @@ if ($client->getAccessToken()) {
 			console.log(activities);
 			$.each(activities.items, function(key, value){
 				var displayName = '(No title)'
+
+				//thumbnails of the user activity
+				if(value.object.actor){
+					displayName = showUserImg(value.object.actor.image.url);
+				}else{
+					displayName = showUserImg(value.actor.image.url);
+				}
+				
 				//some values don't have attachments, so I check if it is defined first, because it will cause an error that breaks jquery
 				if(value.object.attachments){
-					displayName = value.object.attachments['0'].displayName
+					displayName += value.object.attachments['0'].displayName
 				}else{
 					//try to look for other values that I can display (check the console log in chrome)
+					displayName += value.title;
 				}	
 				
 				//I append the id to the a's id. So that I can easily find it in jquery
 				$("#activityUrls").append("<li>" + displayName +" "
 								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
-								+"</li>");
+								+"<span></span></li>");
 			});
 		}
 		
@@ -153,9 +167,9 @@ if ($client->getAccessToken()) {
 				//call the ajax request, I retrieve the id from e.target, 'target' is the element that dispatched this click event
 				requestPlusOnersFromActivity(e.target.id, function(data){
 					if(data.items.length > 0){
-						$(e.target).append("<b> &nbsp Plus oned by </b> "+ data.items.length +" people");
+						$(e.target).next().html("<p><b> &nbsp Plus oned by </b> "+ data.items.length +" people</p>"); //value is not hyperlink
 					}else{
-						$(e.target).append("<b> No one plus oned this");
+						$(e.target).next().html("<p><b> No one plus oned this</p>");
 					}
 					console.log(data);
 				});
