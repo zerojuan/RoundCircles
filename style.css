@@ -15,6 +15,7 @@
 body {
   font-family: Arial,sans-serif;
   margin: auto;
+  background: #FAF3C6;
 }
 
 .box {
@@ -50,6 +51,42 @@ body {
 
 .activity {
   margin: 10px;
+}
+
+#header{
+	background: #250730;
+	height: 	40px;
+	width:		100%;
+}
+
+#header-user{
+	position:	absolute;
+	top:		5px;
+	right:		4px;
+	
+}
+
+#header-user div{
+	float:	left;
+	line-height: 30px;
+	color: #98BABB;
+}
+
+.header-wrapper{
+	height: 	30px;
+	overflow:	hidden;
+	padding:	5px 8px;
+	position:	relative;
+}
+
+.header-btn{
+	float:		left;
+	position:	relative;
+}
+
+.app-icon{
+	width: 		28px;
+	float:		left;
 }
 
 header {

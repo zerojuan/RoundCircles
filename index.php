@@ -80,7 +80,7 @@ if ($client->getAccessToken()) {
 		function showLoggedInUser(data){
 			var thumb = "<img src='"+ data.image.url + "?sz=30'/>";
 			var logout = "<a class='logout' href='?logout'>Logout</a>";
-			$("#userBar").html(user.name + "&nbsp;" + logout + "&nbsp" + thumb);
+			$("#header-user").html("<div>" + user.name + "&nbsp;" + logout + "&nbsp </div> <div>" + thumb + "</div>");
 		}
 		
 		function showSearchResults(data){
@@ -124,7 +124,7 @@ if ($client->getAccessToken()) {
 			return thumb;
 		}
 		
-		function showActivityUrls(){
+		function showActivity(){
 			//you don't have to decode, because the echoed value is a valid json string
 			var activities = <?php echo json_encode($activities); ?>; 
 			// activityURLs only contain the URLs, not the data of the activities
@@ -148,9 +148,9 @@ if ($client->getAccessToken()) {
 				}	
 				
 				//I append the id to the a's id. So that I can easily find it in jquery
-				$("#activityUrls").append("<li>" + displayName +" "
+				$("#activityUrls").append("<div class='activity'>" + displayName +" "
 								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
-								+"<span></span></li>");
+								+"<span></span></li></div>");
 			});
 		}
 		
@@ -158,7 +158,7 @@ if ($client->getAccessToken()) {
 		$(function(){
 			requestMyUserData(showLoggedInUser);
 
-			showActivityUrls();
+			showActivity();
 
 			$(".view-people").click(function(e){
 				//cancel default behaviour
@@ -192,11 +192,21 @@ if ($client->getAccessToken()) {
   <?php
   } else {
   ?>
-	<header><h1>Round Circles</h1> <div id="userBar"></div></header>
+	<div id="header">
+		<div class="header-wrapper">
+			<div class="header-btn">
+				<a class="header-btn-target" href="/" title="Round Circles">
+					<span class="app-icon">Round Circles</span>
+				</a>
+			</div>
+			<div id="header-user">
+			</div>
+		</div>
+	</div>
 	<input type="text" id="query"></input>
 	<a href="#" id="other">Get Others</a>
 	<div id="otherContainer"></div>
-	<ul id="activityUrls"></ul>
+	<div id="activityUrls" class="activities"></div>
 	
   <?php
   }
