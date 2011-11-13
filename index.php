@@ -76,6 +76,9 @@ if ($client->getAccessToken()) {
 			image: '<?php echo $img; ?>',
 			name: '<?php echo $name; ?>'
 		});
+
+		//storage for user info
+		var persons = new Array();
 		
 		function showLoggedInUser(data){
 			var thumb = "<img src='"+ data.image.url + "?sz=30'/>";
@@ -124,7 +127,7 @@ if ($client->getAccessToken()) {
 			return thumb;
 		}
 		
-		function showActivity(){
+		function retrieveUsers(){
 			//you don't have to decode, because the echoed value is a valid json string
 			var activities = <?php echo json_encode($activities); ?>; 
 			// activityURLs only contain the URLs, not the data of the activities
@@ -135,23 +138,27 @@ if ($client->getAccessToken()) {
 				//thumbnails of the user activity
 				if(value.object.actor){
 					displayName = showUserImg(value.object.actor.image.url);
-				}else{
-					displayName = showUserImg(value.actor.image.url);
-				}
-				
-				//some values don't have attachments, so I check if it is defined first, because it will cause an error that breaks jquery
-				if(value.object.attachments){
-					displayName += value.object.attachments['0'].displayName
-				}else{
-					//try to look for other values that I can display (check the console log in chrome)
-					displayName += value.title;
-				}	
+					persons.push(new User({
+						id: value.object.actor.id,
+						image: displayName,
+						name: value.object.actor.displayName
+					}));
+				}				
+			});
+			
+		}
+
+		function showActivity(){
+			retrieveUsers();
+			
+			$.each(persons, function(key, value){
 				
 				//I append the id to the a's id. So that I can easily find it in jquery
-				$("#activityUrls").append("<div class='activity'>" + displayName +" "
+				$("#activityUrls").append("<div class='activity'><span class='usrImg'>" + value.image + "</span>" + value.name +" "
 								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
 								+"<span></span></li></div>");
-			});
+				});
+			console.log(persons);
 		}
 		
 		//called when the document is ready, this initializes jQuery
