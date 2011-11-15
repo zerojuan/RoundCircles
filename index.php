@@ -77,10 +77,12 @@ if ($client->getAccessToken()) {
 			name: '<?php echo $name; ?>'
 		});
 
+		console.log(user);
 		//storage for user info
 		var persons = new Array();
 		
 		function showLoggedInUser(data){
+			console.log(data);
 			var thumb = "<img src='"+ data.image.url + "?sz=30'/>";
 			var logout = "<a class='logout' href='?logout'>Logout</a>";
 			$("#header-user").html("<div>" + user.name + "&nbsp;" + logout + "&nbsp </div> <div>" + thumb + "</div>");
@@ -97,7 +99,7 @@ if ($client->getAccessToken()) {
 							fields:"displayName,image,tagline,url"},
 						success: callback,
 						cache:true,
-						dataType:"jsonp"})
+						dataType:"jsonp"});
 		}
 		
 		function requestSearchUsers(query, callback){
@@ -105,10 +107,10 @@ if ($client->getAccessToken()) {
 						data:{key:user.developerKey,
 							prettyprint:false,
 							query:query,
-							fields:"nextPageToken,title"},
+							maxResults: 10},
 						success: callback,
 						cache:true,
-						dataType:"jsonp"})
+						dataType:"jsonp"});
 		}
 		
 		function requestPlusOnersFromActivity(activityId, callback){
@@ -123,21 +125,23 @@ if ($client->getAccessToken()) {
 		}
 
 		function showUserImg(data){
-			var thumb = "<img src='"+ data + "?sz=30'/> &nbsp ";
+			var thumb = "<img src='"+ data + "'/> &nbsp ";
 			return thumb;
 		}
 		
 		function retrieveUsers(){
-			//you don't have to decode, because the echoed value is a valid json string
 			var activities = <?php echo json_encode($activities); ?>; 
-			// activityURLs only contain the URLs, not the data of the activities
+			
 			console.log(activities);
+			
+			//look for users who reshared or +1d 
 			$.each(activities.items, function(key, value){
 				var displayName = '(No title)'
-
-				//thumbnails of the user activity
+				
 				if(value.object.actor){
+					console.log(value.object.actor);
 					displayName = showUserImg(value.object.actor.image.url);
+					//add them to the user list
 					persons.push(new User({
 						id: value.object.actor.id,
 						image: displayName,
@@ -152,8 +156,6 @@ if ($client->getAccessToken()) {
 			retrieveUsers();
 			
 			$.each(persons, function(key, value){
-				
-				//I append the id to the a's id. So that I can easily find it in jquery
 				$("#activityUrls").append("<div class='activity'><span class='usrImg'>" + value.image + "</span>" + value.name +" "
 								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
 								+"<span></span></li></div>");
@@ -171,7 +173,6 @@ if ($client->getAccessToken()) {
 				//cancel default behaviour
 				e.preventDefault();
 
-				//call the ajax request, I retrieve the id from e.target, 'target' is the element that dispatched this click event
 				requestPlusOnersFromActivity(e.target.id, function(data){
 					if(data.items.length > 0){
 						$(e.target).next().html("<p><b> &nbsp Plus oned by </b> "+ data.items.length +" people</p>"); //value is not hyperlink
