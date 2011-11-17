@@ -77,13 +77,22 @@ if ($client->getAccessToken()) {
 			name: '<?php echo $name; ?>'
 		});
 
-		console.log(user);
 		//storage for user info
 		var persons = new Array();
+
+		//sets image size since the default is 50
+		function resizeImage(url, size){
+			if(url && size){
+				var eqIndex = url.indexOf('=');
+				if(eqIndex > -1)
+					return url = url.substring(0, eqIndex+1) + size.toString();
+				else
+					return url = url + "?sz=" +size.toString()
+			}				
+		}
 		
 		function showLoggedInUser(data){
-			console.log(data);
-			var thumb = "<img src='"+ data.image.url + "?sz=30'/>";
+			var thumb = "<img src='"+ resizeImage(data.image.url, 30) + "'/>";
 			var logout = "<a class='logout' href='?logout'>Logout</a>";
 			$("#header-user").html("<div>" + user.name + "&nbsp;" + logout + "&nbsp </div> <div>" + thumb + "</div>");
 		}
@@ -92,8 +101,9 @@ if ($client->getAccessToken()) {
 			console.log(data);
 		}
 		
-		function requestMyUserData(callback){
-			$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+user.id,
+		//gets user data through parameter userId
+		function requestUserData(userId, callback){
+			$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+userId,
 						data:{key:user.developerKey,
 							prettyprint:false,
 							fields:"displayName,image,tagline,url"},
@@ -124,8 +134,39 @@ if ($client->getAccessToken()) {
 					});
 		}
 
+		function requestActivities(username, callback){
+			$.ajax({url:"https://www.googleapis.com/plus/v1/activities",
+					data:{key:user.developerKey,
+						maxResults:20,
+						prettyprint:false,
+						query:username},
+					success: callback,
+					cache:true,
+					dataType:"jsonp"});
+		}
+
+		function showResults(result){
+			console.log(result);
+			var element = result.items['0'].actor.id; //i don't know how to pass id from caller function so i just searched id from result
+			var columns = '';
+			
+			$.each(result.items, function(key, value){
+				var displayName = '(No Title)';
+				if(value.object.attachments){
+					displayName = value.object.attachments['0'].displayName;
+				}else{
+					displayName = value.title;
+				}			
+				columns += "<tr><td>"+ displayName +"</td></tr>";
+
+			});
+			
+			element = "#" + element + " tbody"; 
+			$(element).append(columns);			
+		}
+
 		function showUserImg(data){
-			var thumb = "<img src='"+ data + "'/> &nbsp ";
+			var thumb = "<img src='"+ resizeImage(data, 30) + "'/>";
 			return thumb;
 		}
 		
@@ -139,13 +180,13 @@ if ($client->getAccessToken()) {
 				var displayName = '(No title)'
 				
 				if(value.object.actor){
-					console.log(value.object.actor);
-					displayName = showUserImg(value.object.actor.image.url);
+					displayName = value.object.actor.image.url;
 					//add them to the user list
 					persons.push(new User({
 						id: value.object.actor.id,
 						image: displayName,
-						name: value.object.actor.displayName
+						name: value.object.actor.displayName,
+						url: value.object.actor.url
 					}));
 				}				
 			});
@@ -156,16 +197,18 @@ if ($client->getAccessToken()) {
 			retrieveUsers();
 			
 			$.each(persons, function(key, value){
-				$("#activityUrls").append("<div class='activity'><span class='usrImg'>" + value.image + "</span>" + value.name +" "
-								+ "<a class='view-people' href='#' id='" + value.id + "'> view people </a>"  
-								+"<span></span></li></div>");
+				$("#activityUrls").append("<table class='activity' id='"+ value.id +"' style='border:1px;border-color:black;border-style:solid;'>"
+								+ "<tr><th class='usrName'>" + value.name + "</th></tr>" 
+								+ "<tr><td>" + showUserImg(value.image) +"</td></tr>"  
+								+ "</tbody></table>");
+				requestActivities(value.name, showResults); //uses search from API
 				});
 			console.log(persons);
 		}
 		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
-			requestMyUserData(showLoggedInUser);
+			requestUserData(user.id, showLoggedInUser);
 
 			showActivity();
 
@@ -177,7 +220,7 @@ if ($client->getAccessToken()) {
 					if(data.items.length > 0){
 						$(e.target).next().html("<p><b> &nbsp Plus oned by </b> "+ data.items.length +" people</p>"); //value is not hyperlink
 					}else{
-						$(e.target).next().html("<p><b> No one plus oned this</p>");
+						$(e.target).next().html("<p><b> No one plus oned this </b></p>");
 					}
 					console.log(data);
 				});
