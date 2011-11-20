@@ -145,9 +145,8 @@ if ($client->getAccessToken()) {
 					dataType:"jsonp"});
 		}
 
-		function showResults(result){
+		function showResults(result, id){
 			console.log(result);
-			var element = result.items['0'].actor.id; //i don't know how to pass id from caller function so i just searched id from result
 			var columns = '';
 			
 			$.each(result.items, function(key, value){
@@ -161,7 +160,7 @@ if ($client->getAccessToken()) {
 
 			});
 			
-			element = "#" + element + " tbody"; 
+			element = "#" + id + " tbody";
 			$(element).append(columns);			
 		}
 
@@ -201,7 +200,9 @@ if ($client->getAccessToken()) {
 								+ "<tr><th class='usrName'>" + value.name + "</th></tr>" 
 								+ "<tr><td>" + showUserImg(value.image) +"</td></tr>"  
 								+ "</tbody></table>");
-				requestActivities(value.name, showResults); //uses search from API
+				requestActivities(value.name, function(data){
+						showResults(data, value.id);
+					}); //uses search from API
 				});
 			console.log(persons);
 		}
