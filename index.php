@@ -149,6 +149,7 @@ if ($client->getAccessToken()) {
 			console.log(result);
 			var columns = '';
 			var post = "<div class='post'>POSTS<ul>";
+			var status = "<div class='post'>STATUS<ul>";
 			var share = "<div class='share'>SHARES<ul>";
 			var attachment = '';
 			
@@ -166,13 +167,17 @@ if ($client->getAccessToken()) {
 				}			
 
 				if(value.verb == "post"){
-					post += "<li>"+ displayName +"</li>";
+					if(value.actor.id == id){
+						status += "<li>"+ displayName +"</li>";
+					}else{
+						post += "<li>"+ displayName +"</li>";
+					}
 				}else{
 					share += "<li>"+ displayName +"</li>";
 				}
 			});
 
-			columns = "<tr><td>"+ post +"</ul></div></td><td>"+ share +"</ul></div></td></tr>";
+			columns = "<tr><td>"+ post +"</ul></div></td><td>"+ status +"</ul></div></td><td>"+ share +"</ul></div></td></tr>";
 			
 			element = "#" + id + " tbody";
 			$(element).append(columns);			
