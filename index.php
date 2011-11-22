@@ -148,17 +148,31 @@ if ($client->getAccessToken()) {
 		function showResults(result, id){
 			console.log(result);
 			var columns = '';
+			var post = "<div class='post'>POSTS<ul>";
+			var share = "<div class='share'>SHARES<ul>";
+			var attachment = '';
 			
 			$.each(result.items, function(key, value){
 				var displayName = '(No Title)';
 				if(value.object.attachments){
-					displayName = value.object.attachments['0'].displayName;
+					attachment = value.object.attachments['0'];
+					if(attachment.displayName){
+						displayName = attachment.displayName;
+					}else{
+						displayName = "<img src='"+ resizeImage(attachment.fullImage.url, 100) + "'/>";
+					}
 				}else{
 					displayName = value.title;
 				}			
-				columns += "<tr><td>"+ displayName +"</td></tr>";
 
+				if(value.verb == "post"){
+					post += "<li>"+ displayName +"</li>";
+				}else{
+					share += "<li>"+ displayName +"</li>";
+				}
 			});
+
+			columns = "<tr><td>"+ post +"</ul></div></td><td>"+ share +"</ul></div></td></tr>";
 			
 			element = "#" + id + " tbody";
 			$(element).append(columns);			
