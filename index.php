@@ -78,7 +78,7 @@ if ($client->getAccessToken()) {
 		});
 
 		//storage for user info
-		var persons = new Array();
+		var persons = [];
 
 		//sets image size since the default is 50
 		function resizeImage(url, size){
@@ -106,7 +106,7 @@ if ($client->getAccessToken()) {
 			$.ajax({url:"https://www.googleapis.com/plus/v1/people/"+userId,
 						data:{key:user.developerKey,
 							prettyprint:false,
-							fields:"displayName,image,tagline,url"},
+							fields:"id, image, displayName, url"},
 						success: callback,
 						cache:true,
 						dataType:"jsonp"});
@@ -189,41 +189,44 @@ if ($client->getAccessToken()) {
 		}
 		
 		function retrieveUsers(){
-			var activities = <?php echo json_encode($activities); ?>; 
+			var userIDs = ['101805484443568050673', '115885542344045398939', '108551811075711499995', '112351852201222657844', '100911896071656032025']; 
 			
-			console.log(activities);
+			console.log(userIDs);
 			
-			//look for users who reshared or +1d 
-			$.each(activities.items, function(key, value){
-				var displayName = '(No title)'
-				
-				if(value.object.actor){
-					displayName = value.object.actor.image.url;
-					//add them to the user list
-					persons.push(new User({
-						id: value.object.actor.id,
-						image: displayName,
-						name: value.object.actor.displayName,
-						url: value.object.actor.url
-					}));
-				}				
+			$.each(userIDs, function(key, value){	
+				if(value != null){
+					requestUserData(value, function(data){
+						//add them to the user list
+						persons.push(new User({
+							id: data.id,
+							image: data.image.url,
+							name: data.displayName,
+							url: data.url
+						}));
+
+						//console.log(persons);	
+					});			
+				}
 			});
-			
 		}
 
 		function showActivity(){
 			retrieveUsers();
 			
+			console.log(persons);	
+			
 			$.each(persons, function(key, value){
-				$("#activityUrls").append("<table class='activity' id='"+ value.id +"' style='border:1px;border-color:black;border-style:solid;'>"
+				var msg = value.id; //+ ", " + value.name + ", " value.image;
+				console.log(msg);
+				/*$("#activityUrls").append("<table class='activity' id='"+ value.id +"' style='border:1px;border-color:black;border-style:solid;'>"
 								+ "<tr><th class='usrName'>" + value.name + "</th></tr>" 
 								+ "<tr><td>" + showUserImg(value.image) +"</td></tr>"  
 								+ "</tbody></table>");
 				requestActivities(value.name, function(data){
 						showResults(data, value.id);
 					}); //uses search from API
+				*/
 				});
-			console.log(persons);
 		}
 		
 		//called when the document is ready, this initializes jQuery
