@@ -203,8 +203,16 @@ if ($client->getAccessToken()) {
 							name: data.displayName,
 							url: data.url
 						}));
-
-						//console.log(persons);	
+						
+						
+						$("#activityUrls").append("<table class='activity' id='"+ data.id +"' style='border:1px;border-color:black;border-style:solid;'>"
+								+ "<tr><th class='usrName'>" + data.displayName + "</th></tr>" 
+								+ "<tr><td>" + showUserImg(data.image.url) +"</td></tr>"  
+								+ "</tbody></table>");
+						//get the activities of this user		
+						requestActivities(data.displayName, function(result){
+								showResults(result, data.id);
+							});	
 					});			
 				}
 			});
@@ -213,19 +221,11 @@ if ($client->getAccessToken()) {
 		function showActivity(){
 			retrieveUsers();
 			
-			console.log(persons);	
+			//console.log(persons);	
 			
 			$.each(persons, function(key, value){
 				var msg = value.id; //+ ", " + value.name + ", " value.image;
 				console.log(msg);
-				/*$("#activityUrls").append("<table class='activity' id='"+ value.id +"' style='border:1px;border-color:black;border-style:solid;'>"
-								+ "<tr><th class='usrName'>" + value.name + "</th></tr>" 
-								+ "<tr><td>" + showUserImg(value.image) +"</td></tr>"  
-								+ "</tbody></table>");
-				requestActivities(value.name, function(data){
-						showResults(data, value.id);
-					}); //uses search from API
-				*/
 				});
 		}
 		
