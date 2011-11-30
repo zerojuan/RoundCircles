@@ -90,6 +90,29 @@ if ($client->getAccessToken()) {
 					return url = url + "?sz=" +size.toString()
 			}				
 		}
+
+		//sets the word into its past tense form
+		function makePastTense(str){
+			if(isVowel(str.charAt(str.length - 1))){
+				return str = str + 'd';
+			}else{
+				return str = str + 'ed';
+			}
+		}
+
+		function makePhrase(str){
+			if(isVowel(str.charAt(0))){
+				return str = 'an ' + str;
+			}else{
+				return str = 'a ' + str;
+			}
+		}
+
+		//checks letter if vowel
+		function isVowel(ltr){
+			var vowels = 'aeiou';
+			return ((vowels.indexOf(ltr)) > -1);
+		}
 		
 		function showLoggedInUser(data){
 			var thumb = "<img src='"+ resizeImage(data.image.url, 30) + "'/>";
@@ -148,36 +171,28 @@ if ($client->getAccessToken()) {
 		function showResults(result, id){
 			console.log(result);
 			var columns = '';
-			var post = "<div class='post'>POSTS<ul>";
-			var status = "<div class='post'>STATUS<ul>";
-			var share = "<div class='share'>SHARES<ul>";
+			var activityType = '';
+			var objectType = '';
 			var attachment = '';
+			var displayName = '';
 			
 			$.each(result.items, function(key, value){
-				var displayName = '(No Title)';
+				displayName = (value.content != null) ? value.content : ''; //gets the user's post
+				activityType = value.verb; //gets the type of activity
+				
 				if(value.object.attachments){
 					attachment = value.object.attachments['0'];
 					if(attachment.displayName){
-						displayName = attachment.displayName;
+						displayName += attachment.displayName;
+						objectType = attachment.objectType;
 					}else{
-						displayName = "<img src='"+ resizeImage(attachment.fullImage.url, 100) + "'/>";
+						displayName += "<img src='"+ resizeImage(attachment.fullImage.url, 100) + "'/>";
 					}
-				}else{
-					displayName = value.title;
-				}			
-
-				if(value.verb == "post"){
-					if(value.actor.id == id){
-						status += "<li>"+ displayName +"</li>";
-					}else{
-						post += "<li>"+ displayName +"</li>";
-					}
-				}else{
-					share += "<li>"+ displayName +"</li>";
 				}
-			});
 
-			columns = "<tr><td>"+ post +"</ul></div></td><td>"+ status +"</ul></div></td><td>"+ share +"</ul></div></td></tr>";
+				displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>";
+				columns += "<tr><td>" + displayName + "</td></tr>";
+			});
 			
 			element = "#" + id + " tbody";
 			$(element).append(columns);			
