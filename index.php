@@ -190,7 +190,7 @@ if ($client->getAccessToken()) {
 						if(attachment.displayName){
 							displayName += "<br><br><a href='"+ attachment.url + "'>" + attachment.displayName + "</a>";
 							objectType = attachment.objectType;
-						//}else{
+							
 							if(value.object.attachments['1'] != null){
 								attachment = value.object.attachments['1'];
 								displayName += "<br><br><img src='"+ attachment.fullImage.url + "'/>";
@@ -201,7 +201,7 @@ if ($client->getAccessToken()) {
 						objectType = 'status';
 					}
 	
-					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>";
+					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>" + "<br><br><i style='font-size:9px;'>" + new Date(value.published).toDateString() + "</i>";
 					columns += "<div style='padding:10px;margin:0 auto;width:900px;border:1px;border-color:gray;border-style:solid;'>" + displayName + "</div>";
 				}
 
