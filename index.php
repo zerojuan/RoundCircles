@@ -100,6 +100,7 @@ if ($client->getAccessToken()) {
 			}
 		}
 
+		//creates phrase
 		function makePhrase(str){
 			if(isVowel(str.charAt(0))){
 				return str = 'an ' + str;
@@ -177,24 +178,40 @@ if ($client->getAccessToken()) {
 			var displayName = '';
 			
 			$.each(result.items, function(key, value){
-				displayName = (value.content != null) ? value.content : ''; //gets the user's post
-				activityType = value.verb; //gets the type of activity
-				
-				if(value.object.attachments){
-					attachment = value.object.attachments['0'];
-					if(attachment.displayName){
-						displayName += attachment.displayName;
-						objectType = attachment.objectType;
+				if(value.actor.id == id){ //checks if the post is from user
+					activityType = value.verb; //gets the type of activity
+					
+					//console.log("User post: " + JSON.stringify(value.object));
+					
+					if(value.object.attachments){
+						displayName = (value.object.content != null) ? value.object.content : ''; //gets the user's post
+						attachment = value.object.attachments['0'];
+						
+						if(attachment.displayName){
+							displayName += "<br><br><a href='"+ attachment.url + "'>" + attachment.displayName + "</a>";
+							objectType = attachment.objectType;
+						//}else{
+							if(value.object.attachments['1'] != null){
+								attachment = value.object.attachments['1'];
+								displayName += "<br><br><img src='"+ attachment.fullImage.url + "'/>";
+							}
+						}
 					}else{
-						displayName += "<img src='"+ resizeImage(attachment.fullImage.url, 100) + "'/>";
+						displayName = value.object.content;
+						objectType = 'status';
 					}
+	
+					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>";
+					columns += "<div style='padding:10px;margin:0 auto;width:900px;border:1px;border-color:gray;border-style:solid;'>" + displayName + "</div>";
 				}
 
-				displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>";
-				columns += "<tr><td>" + displayName + "</td></tr>";
 			});
 			
-			element = "#" + id + " tbody";
+			//element = "#" + id + " tbody";
+			element = "#" + id;
+			if(columns == null || columns == ''){
+				columns = "<div style='padding:10px;margin:0 auto;width:900px;border:1px;border-color:gray;border-style:solid;'><i>has no public posts...</i></div>";
+			}
 			$(element).append(columns);			
 		}
 
@@ -220,10 +237,10 @@ if ($client->getAccessToken()) {
 						}));
 						
 						
-						$("#activityUrls").append("<table class='activity' id='"+ data.id +"' style='border:1px;border-color:black;border-style:solid;'>"
-								+ "<tr><th class='usrName'>" + data.displayName + "</th></tr>" 
-								+ "<tr><td>" + showUserImg(data.image.url) +"</td></tr>"  
-								+ "</tbody></table>");
+						$("#activityUrls").append("<div class='activity' id='"+ data.id +"' style='padding:10px;width:1000px;border:1px;border-color:black;border-style:solid;'>"
+								+ "<div class='usrName'>" + data.displayName + "</div>" 
+								+ "<div>" + showUserImg(data.image.url) +"</div>"  
+								+ "</div>");
 						//get the activities of this user		
 						requestActivities(data.displayName, function(result){
 								showResults(result, data.id);
@@ -295,7 +312,7 @@ if ($client->getAccessToken()) {
 	<input type="text" id="query"></input>
 	<a href="#" id="other">Get Others</a>
 	<div id="otherContainer"></div>
-	<div id="activityUrls" class="activities"></div>
+	<div id="activityUrls" class="activities" style="padding: 10px; margin: 0 auto; width:1100px;"></div>
 	
   <?php
   }
