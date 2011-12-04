@@ -15,7 +15,9 @@
 body {
   font-family: Arial,sans-serif;
   margin: auto;
-  background: #FAF3C6;
+  /*background: #FAF3C6;*/
+  background: #F8FBFA;
+  font-size: 12px;
 }
 
 .box {
@@ -54,7 +56,8 @@ body {
 }
 
 #header{
-	background: #250730;
+	/*background: #250730;*/
+	background: #D2564C;
 	height: 	40px;
 	width:		100%;
 }
@@ -69,7 +72,8 @@ body {
 #header-user div{
 	float:	left;
 	line-height: 30px;
-	color: #98BABB;
+	/*color: #98BABB;*/
+	color: #8D2036;
 }
 
 .header-wrapper{
@@ -130,4 +134,45 @@ header h1 {
   font-weight: normal;
   padding-top: -5px;
   margin-top: 0px;
+}
+
+a{
+	text-decoration: none;
+	color: #FE685C;
+}
+
+a:hover{
+	text-decoration: underline;
+	color: #FE685C;	
+}
+
+.post-img{
+	width: 25%;
+	height: auto;
+}
+
+.posts{
+	padding: 10px;
+	margin: 0 auto;
+	width: 900px;
+	border: 1px;
+	border-color: #999999;
+	border-style: solid;
+}
+.activities{
+	padding: 10px; 
+	margin: 0 auto; 
+	width: 1100px;
+}
+.activity{
+	padding: 10px;
+	width: 1000px;
+	border: 1px;
+	border-color: #7F7F7F;
+	border-style: solid;
+}
+
+.published-date{
+	font-size:9px;
+	color: #7F7F7F;
 }

@@ -193,7 +193,7 @@ if ($client->getAccessToken()) {
 							
 							if(value.object.attachments['1'] != null){
 								attachment = value.object.attachments['1'];
-								displayName += "<br><br><img src='"+ attachment.fullImage.url + "'/>";
+								displayName += "<br><br><img class='post-img' src='"+ attachment.fullImage.url + "'/>";
 							}
 						}
 					}else{
@@ -201,8 +201,8 @@ if ($client->getAccessToken()) {
 						objectType = 'status';
 					}
 	
-					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>" + "<br><br><i style='font-size:9px;'>" + new Date(value.published).toDateString() + "</i>";
-					columns += "<div style='padding:10px;margin:0 auto;width:900px;border:1px;border-color:gray;border-style:solid;'>" + displayName + "</div>";
+					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>" + "<br><br><i class='published-date'>" + new Date(value.published).toDateString() + "</i>";
+					columns += "<div class='posts'>" + displayName + "</div>";
 				}
 
 			});
@@ -210,7 +210,7 @@ if ($client->getAccessToken()) {
 			//element = "#" + id + " tbody";
 			element = "#" + id;
 			if(columns == null || columns == ''){
-				columns = "<div style='padding:10px;margin:0 auto;width:900px;border:1px;border-color:gray;border-style:solid;'><i>has no public posts...</i></div>";
+				columns = "<div class='posts'><i>has no public posts...</i></div>";
 			}
 			$(element).append(columns);			
 		}
@@ -237,8 +237,8 @@ if ($client->getAccessToken()) {
 						}));
 						
 						
-						$("#activityUrls").append("<div class='activity' id='"+ data.id +"' style='padding:10px;width:1000px;border:1px;border-color:black;border-style:solid;'>"
-								+ "<div class='usrName'>" + data.displayName + "</div>" 
+						$("#activity-urls").append("<div class='activity' id='"+ data.id +"'>"
+								+ "<div class='usr-name'>" + data.displayName + "</div>" 
 								+ "<div>" + showUserImg(data.image.url) +"</div>"  
 								+ "</div>");
 						//get the activities of this user		
@@ -265,6 +265,8 @@ if ($client->getAccessToken()) {
 		$(function(){
 			requestUserData(user.id, showLoggedInUser);
 
+			$(".app-icon").prepend("<img src='images/round-circles.png' alt='Round Circles'/>");
+			
 			showActivity();
 
 			$(".view-people").click(function(e){
@@ -302,7 +304,7 @@ if ($client->getAccessToken()) {
 		<div class="header-wrapper">
 			<div class="header-btn">
 				<a class="header-btn-target" href="/" title="Round Circles">
-					<span class="app-icon">Round Circles</span>
+					<span class="app-icon"></span>
 				</a>
 			</div>
 			<div id="header-user">
@@ -311,8 +313,8 @@ if ($client->getAccessToken()) {
 	</div>
 	<input type="text" id="query"></input>
 	<a href="#" id="other">Get Others</a>
-	<div id="otherContainer"></div>
-	<div id="activityUrls" class="activities" style="padding: 10px; margin: 0 auto; width:1100px;"></div>
+	<div id="other-container"></div>
+	<div id="activity-urls" class="activities"></div>
 	
   <?php
   }
