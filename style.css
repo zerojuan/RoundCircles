@@ -173,6 +173,41 @@ a:hover{
 }
 
 .published-date{
-	font-size:9px;
+	font-size: 9px;
 	color: #7F7F7F;
 }
+
+.menu{
+	margin: 0 ;
+	padding: 0;
+}
+
+.menu li{
+	list-style: none;
+	float: left;
+	margin: 10px;
+	position: relative;
+}
+
+.menu li a{
+	z-index: 1000;
+}
+
+.menu li a:link, .menu li a:visited{
+	display: block;
+	text-decoration: none;
+	margin: 0;
+}
+
+.menu li div{
+	position: absolute;
+	visibility: hidden;
+	z-index: 999;
+	margin: 0;
+	padding: 10px;
+	border: 1px solid black;
+	-moz-box-shadow: 5px 5px 10px #999999;
+	-webkit-box-shadow: 5px 5px 10px #999999;
+	box-shadow: 5px 5px 10px #999999;
+}
+

@@ -80,6 +80,23 @@ if ($client->getAccessToken()) {
 		//storage for user info
 		var persons = [];
 
+		//sets search-form events
+		function searchFormEvents(){
+			$('.menu > li').bind('mouseover', function(){
+				$(this).find('div').css({
+					'visibility': 'visible',
+					'z-index': '999'
+				});
+			});
+			
+			$('.menu > li').bind('mouseout', function(){
+				$(this).find('div').css({
+					'visibility': 'hidden',
+					'z-index': '999'
+				});
+			});
+		}
+
 		//sets image size since the default is 50
 		function resizeImage(url, size){
 			if(url && size){
@@ -263,6 +280,8 @@ if ($client->getAccessToken()) {
 		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
+			searchFormEvents();
+			
 			requestUserData(user.id, showLoggedInUser);
 
 			$(".app-icon").prepend("<img src='images/round-circles.png' alt='Round Circles'/>");
@@ -307,12 +326,18 @@ if ($client->getAccessToken()) {
 					<span class="app-icon"></span>
 				</a>
 			</div>
+			<ul class="menu">
+				<li><a href="#">menu</a>
+					<div id="search-form">
+						<input type="text" id="query"></input>
+						<a href="#" id="other">Get Others</a>
+					</div>
+				</li>
+			</ul>
 			<div id="header-user">
 			</div>
 		</div>
 	</div>
-	<input type="text" id="query"></input>
-	<a href="#" id="other">Get Others</a>
 	<div id="other-container"></div>
 	<div id="activity-urls" class="activities"></div>
 	
