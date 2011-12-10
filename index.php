@@ -195,8 +195,9 @@ if ($client->getAccessToken()) {
 			var displayName = '';
 			
 			$.each(result.items, function(key, value){
+				activityType = value.verb; //gets the type of activity
+				
 				if(value.actor.id == id){ //checks if the post is from user
-					activityType = value.verb; //gets the type of activity
 					
 					//console.log("User post: " + JSON.stringify(value.object));
 					
@@ -217,11 +218,21 @@ if ($client->getAccessToken()) {
 						displayName = value.object.content;
 						objectType = 'status';
 					}
-	
-					displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>" + "<br><br><i class='published-date'>" + new Date(value.published).toDateString() + "</i>";
-					columns += "<div class='posts'>" + displayName + "</div>";
+				}else if(displayName == ''){
+					displayName = " on " + value.actor.displayName + "\'s " + activityType + "<br><br>" + value.object.content;
+					
+					if(value.object.plusoners.totalItems > 0){
+						objectType = 'comment';
+					}else if(value.object.replies.totalItems > 0){
+						objectType = 'plusone';
+					}else if(value.object.resharers.totalItems > 0){
+						objectType = 'reshare';
+					}
 				}
+				displayName = "<i>" + makePastTense(activityType) + "</i> " + makePhrase(objectType) + " <b>" + displayName + "</b>" + "<br><br><i class='published-date'>" + new Date(value.published).toDateString() + "</i>";
+				columns += "<div class='posts'>" + displayName + "</div>";
 
+				displayName = '';
 			});
 			
 			//element = "#" + id + " tbody";
