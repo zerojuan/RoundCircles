@@ -193,6 +193,7 @@ if ($client->getAccessToken()) {
 			var objectType = '';
 			var attachment = '';
 			var displayName = '';
+			var element = "#" + id;;
 			
 			$.each(result.items, function(key, value){
 				activityType = value.verb; //gets the type of activity
@@ -236,7 +237,6 @@ if ($client->getAccessToken()) {
 			});
 			
 			//element = "#" + id + " tbody";
-			element = "#" + id;
 			if(columns == null || columns == ''){
 				columns = "<div class='posts'><i>has no public posts...</i></div>";
 			}
@@ -277,27 +277,14 @@ if ($client->getAccessToken()) {
 				}
 			});
 		}
-
-		function showActivity(){
-			retrieveUsers();
-			
-			//console.log(persons);	
-			
-			$.each(persons, function(key, value){
-				var msg = value.id; //+ ", " + value.name + ", " value.image;
-				console.log(msg);
-				});
-		}
 		
 		//called when the document is ready, this initializes jQuery
 		$(function(){
 			searchFormEvents();
 			
 			requestUserData(user.id, showLoggedInUser);
-
-			$(".app-icon").prepend("<img src='images/round-circles.png' alt='Round Circles'/>");
 			
-			showActivity();
+			retrieveUsers();
 
 			$(".view-people").click(function(e){
 				//cancel default behaviour
@@ -333,8 +320,8 @@ if ($client->getAccessToken()) {
 	<div id="header">
 		<div class="header-wrapper">
 			<div class="header-btn">
-				<a class="header-btn-target" href="/" title="Round Circles">
-					<span class="app-icon"></span>
+				<a class="header-btn-target" href="#" title="Round Circles">
+					<span class="app-icon"><img src='images/round-circles.png' alt='Round Circles'/></span>
 				</a>
 			</div>
 			<ul class="menu">
