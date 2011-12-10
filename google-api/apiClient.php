@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// Check for the required json and curl extensions, the google api php client won't function without
+// Check for the required json and curl extensions, the Google API PHP Client won't function without
 if (! function_exists('curl_init')) {
   throw new Exception('The Google PHP API Library needs the CURL PHP extension');
 }
@@ -25,7 +25,7 @@ if (! function_exists('json_decode')) {
 
 // hack around with the include paths a bit so the library 'just works'
 $cwd = dirname(__FILE__);
-set_include_path("$cwd" . PATH_SEPARATOR . ":" . get_include_path());
+set_include_path("$cwd" . PATH_SEPARATOR . get_include_path());
 
 require_once "config.php";
 // If a local configuration file is found, merge it's values with the default configuration
@@ -36,10 +36,10 @@ if (file_exists($cwd . '/local_config.php')) {
 }
 
 // Include the top level classes, they each include their own dependencies
-require_once "auth/apiAuth.php";
-require_once "cache/apiCache.php";
-require_once "io/apiIO.php";
-require_once "service/apiService.php";
+require_once 'auth/apiAuth.php';
+require_once 'cache/apiCache.php';
+require_once 'io/apiIO.php';
+require_once 'service/apiService.php';
 
 // Exceptions that the Google PHP API Library can throw
 class apiException extends Exception {}
@@ -48,28 +48,30 @@ class apiCacheException extends apiException {}
 class apiIOException extends apiException {}
 class apiServiceException extends apiException {}
 
-
-// Global array of type handlers, used by the API request executors to parse results
-// maps the type strings ('plus#activity') to a class representation (plusActivityModel)
-// which will be automatically triggered on input.
-global $apiTypeHandlers;
-$apiTypeHandlers = array();
-
 /**
  * The Google API Client
  * http://code.google.com/p/google-api-php-client/
  *
  * @author Chris Chabot <chabotc@google.com>
+ * @author Chirag Shah <chirags@google.com>
  */
 class apiClient {
   // the version of the discovery mechanism this class is meant to work with
   const discoveryVersion = 'v0.3';
 
-  // worker classes
+  /** @var apiAuth $auth */
   protected $auth;
+
+  /** @var apiIo $io */
   protected $io;
+
+  /** @var apiCache $cache */
   protected $cache;
+
+  /** @var array $scopes */
   protected $scopes = array();
+
+  /** @var bool $useObjects */
   protected $useObjects = false;
 
   // definitions of services that are discover()'rd
@@ -105,7 +107,7 @@ class apiClient {
     global $apiConfig;
     if ($this->authenticated) {
       // Adding services after being authenticated, since the oauth scope is already set (so you wouldn't have access to that data)
-      throw new apiException("Can't add services after having authenticated");
+      throw new apiException('Cant add services after having authenticated');
     }
     $this->services[$service] = $this->defaultService;
     if (isset($apiConfig['services'][$service])) {
@@ -130,7 +132,10 @@ class apiClient {
     return $this->auth->authenticate($service);
   }
 
-  
+  /**
+   * Construct the OAuth 2.0 authorization request URI.
+   * @return string 
+   */
   public function createAuthUrl() {
     $service = $this->prepareService();
     return $this->auth->createAuthUrl($service);
@@ -162,8 +167,11 @@ class apiClient {
   }
 
   /**
-   * Set the OAuth access token using the string that resulted from calling authenticate()
-   * @param (serialized) string $accessToken
+   * Set the OAuth 2.0 access token using the string that resulted from calling authenticate()
+   * or apiClient#getAccessToken().
+   * @param string $accessToken JSON encoded string containing in the following format:
+   * {"access_token":"TOKEN", "refresh_token":"TOKEN", "token_type":"Bearer",
+   *  "expires_in":3600,"id_token":"TOKEN", "created":1320790426}
    */
   public function setAccessToken($accessToken) {
     if ($accessToken == null || 'null' == $accessToken) {
@@ -172,6 +180,12 @@ class apiClient {
     $this->auth->setAccessToken($accessToken);
   }
 
+  /**
+   * Get the OAuth 2.0 access token.
+   * @return string $accessToken JSON encoded string containing in the following format:
+   * {"access_token":"TOKEN", "refresh_token":"TOKEN", "token_type":"Bearer",
+   *  "expires_in":3600,"id_token":"TOKEN", "created":1320790426}
+   */
   public function getAccessToken() {
     $token = $this->auth->getAccessToken();
     return (null == $token || 'null' == $token) ? null : $token;
@@ -194,6 +208,25 @@ class apiClient {
   public function setState($state) {
     $this->auth->setState($state);
   }
+
+  /**
+   * @param string $accessType Possible values for access_type include:
+   *  {@code "offline"} to request offline access from the user. (This is the default value)
+   *  {@code "online"} to request online access from the user.
+   */
+  public function setAccessType($accessType) {
+    $this->auth->setAccessType($accessType);
+  }
+
+  /**
+   * @param string $approvalPrompt Possible values for approval_prompt include:
+   *  {@code "force"} to force the approval UI to appear. (This is the default value)
+   *  {@code "auto"} to request auto-approval when possible.
+   */
+  public function setApprovalPrompt($approvalPrompt) {
+    $this->auth->setApprovalPrompt($approvalPrompt);
+  }
+
   /**
    * Set the application name, this is included in the User-Agent HTTP header.
    * @param string $applicationName
@@ -204,7 +237,7 @@ class apiClient {
   }
 
   /**
-   * Set the OAuth2 Client ID.
+   * Set the OAuth 2.0 Client ID.
    * @param string $clientId
    */
   public function setClientId($clientId) {
@@ -214,7 +247,7 @@ class apiClient {
   }
   
   /**
-   * Set the OAuth2 Client Secret.
+   * Set the OAuth 2.0 Client Secret.
    * @param string $clientSecret
    */
   public function setClientSecret($clientSecret) {
@@ -224,7 +257,7 @@ class apiClient {
   }
 
   /**
-   * Set the OAuth2 Redirect URI.
+   * Set the OAuth 2.0 Redirect URI.
    * @param string $redirectUri
    */
   public function setRedirectUri($redirectUri) {
@@ -264,11 +297,6 @@ class apiClient {
       throw new apiException("Invalid json returned for $serviceName");
     }
     return new apiService($serviceName, $discoveryDocument, $this->io);
-  }
-
-  public function registerTypeHandler($type, $handlerClass) {
-    global $apiTypeHandlers;
-    $apiTypeHandlers[$type] = $handlerClass;
   }
 
   /*

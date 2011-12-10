@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Google Inc.
+ * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,17 @@
  * limitations under the License.
  */
 
-require_once "apiAuthNone.php";
-require_once "apiOAuth.php";
-require_once "apiOAuth2.php";
+require_once "apiPemVerifier.php";
 
 /**
- * Abstract class for the Authentication in the API client
- * @author Chris Chabot <chabotc@google.com>
+ * Verifies signatures.
  *
+ * @author Brian Eaton <beaton@google.com>
  */
-abstract class apiAuth {
-  /** @var apiIo $io */
-  public $io;
-
-  abstract public function authenticate($service);
-  abstract public function setAccessToken($accessToken);
-  abstract public function setDeveloperKey($developerKey);
-  abstract public function sign(apiHttpRequest $request);
-
-  public function setIo(apiIo $io) {
-    $this->io = $io;
-  }
+abstract class apiVerifier {
+  /**
+   * Checks a signature, returns true if the signature is correct,
+   * false otherwise.
+   */
+  abstract public function verify($data, $signature);
 }
