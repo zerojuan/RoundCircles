@@ -83,17 +83,11 @@ if ($client->getAccessToken()) {
 		//sets search-form events
 		function searchFormEvents(){
 			$('.menu > li').bind('mouseover', function(){
-				$(this).find('div').css({
-					'visibility': 'visible',
-					'z-index': '999'
-				});
+				$(this).find('div').css('visibility', 'visible');
 			});
 			
 			$('.menu > li').bind('mouseout', function(){
-				$(this).find('div').css({
-					'visibility': 'hidden',
-					'z-index': '999'
-				});
+				$(this).find('div').css('visibility', 'hidden');
 			});
 		}
 
@@ -130,6 +124,15 @@ if ($client->getAccessToken()) {
 		function isVowel(ltr){
 			var vowels = 'aeiou';
 			return ((vowels.indexOf(ltr)) > -1);
+		}
+
+		//checks character count of string
+		function checkChars(str){
+			if(str.search(/(<([^>]+)>)/ig) < 0){
+				return str = str.substring(0, 139) + "...";
+			}else{
+				return str;
+			}
 		}
 		
 		function showLoggedInUser(data){
@@ -193,7 +196,7 @@ if ($client->getAccessToken()) {
 			var objectType = '';
 			var attachment = '';
 			var displayName = '';
-			var element = "#" + id;;
+			var element = "#" + id + " div.usr-posts:last-child";
 			
 			$.each(result.items, function(key, value){
 				activityType = value.verb; //gets the type of activity
@@ -203,7 +206,7 @@ if ($client->getAccessToken()) {
 					//console.log("User post: " + JSON.stringify(value.object));
 					
 					if(value.object.attachments){
-						displayName = (value.object.content != null) ? value.object.content : ''; //gets the user's post
+						displayName = (value.object.content != null) ? checkChars(value.object.content) : ''; //gets the user's post
 						attachment = value.object.attachments['0'];
 						
 						if(attachment.displayName){
@@ -216,16 +219,16 @@ if ($client->getAccessToken()) {
 							}
 						}
 					}else{
-						displayName = value.object.content;
+						displayName = checkChars(value.object.content);
 						objectType = 'status';
 					}
 				}else if(displayName == ''){
-					displayName = " on " + value.actor.displayName + "\'s " + activityType + "<br><br>" + value.object.content;
-					
+					displayName = " on " + value.actor.displayName + "\'s " + activityType + "<br><br><a href='" + value.object.url + "'>" + checkChars(value.object.content) + "</a>";
+	
 					if(value.object.plusoners.totalItems > 0){
-						objectType = 'comment';
-					}else if(value.object.replies.totalItems > 0){
 						objectType = 'plusone';
+					}else if(value.object.replies.totalItems > 0){
+						objectType = 'comment';
 					}else if(value.object.resharers.totalItems > 0){
 						objectType = 'reshare';
 					}
@@ -266,9 +269,8 @@ if ($client->getAccessToken()) {
 						
 						
 						$("#activity-urls").append("<div class='activity' id='"+ data.id +"'>"
-								+ "<div class='usr-name'>" + data.displayName + "</div>" 
-								+ "<div>" + showUserImg(data.image.url) +"</div>"  
-								+ "</div>");
+								+ "<div class='usr-info'><div class='usr-name'>" + data.displayName + showUserImg(data.image.url) + "</div></div>" 
+								+ "<div class='usr-posts'></div></div>");
 						//get the activities of this user		
 						requestActivities(data.displayName, function(result){
 								showResults(result, data.id);
