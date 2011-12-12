@@ -54,6 +54,8 @@ img{
 	background: #D2564C;
 	height: 	40px;
 	width:		100%;
+	position: fixed;
+	z-index: 1000;
 }
 
 #header-user{
@@ -159,7 +161,9 @@ a:hover{
   	-webkit-box-flex: 2;
   	-moz-box-flex: 2;
   	box-flex: 2;
-  	width: 100%;
+  	text-align: center;
+  	position: relative;
+	top: 40px;
 }
 
 .activity{
@@ -168,7 +172,13 @@ a:hover{
 	border-color: #7F7F7F;
 	border-style: solid;
   	margin: 10px;
-  	float: left;
+  	//float: left;
+	height: 1000px;
+	overflow-y: hidden;
+  	text-align: left;
+  	display: inline-block;
+    /* make it work in ie7 */
+    *display: inline;
 }
 
 .published-date{

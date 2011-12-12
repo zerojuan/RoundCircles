@@ -64,10 +64,12 @@ if ($client->getAccessToken()) {
 <!doctype html>
 <html>
 <head>
-	<link rel='stylesheet' href='style.css' />
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-	<script type="text/javascript" src="scripts/User.js"></script>
-	<script type="text/javascript">
+<link rel='stylesheet' href='style.css' />
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript" src="scripts/User.js"></script>
+<script type="text/javascript">
 		//set a user object
 		var user = new User({
 			id: '<?php echo $me['id']; ?>',
@@ -127,11 +129,32 @@ if ($client->getAccessToken()) {
 		}
 
 		//checks character count of string
-		function checkChars(str){
-			if(str.search(/(<([^>]+)>)/ig) < 0){
-				return str = str.substring(0, 139) + "...";
-			}else{
-				return str;
+		function countChar(str){
+			var tag = 'close';
+			var html = '';
+			var count = 0;
+			var ctr = 0;
+			
+			if(str.length > 140){
+				while(count < 140){
+					if(tag == 'close'){
+						if(str.charAt(ctr) == '<'){
+							tag = 'open';
+							html += (str.charAt(ctr) + "/");
+						}else{
+							count++;
+						}
+					}
+					
+					if(str.charAt(ctr) == '>'){
+							tag = 'close';
+							html += (str.charAt(ctr - 1) + str.charAt(ctr));
+					}
+					
+					ctr++;
+				}
+				
+				return str = str.substring(0, ctr) + "..." + html;
 			}
 		}
 		
@@ -206,7 +229,7 @@ if ($client->getAccessToken()) {
 					//console.log("User post: " + JSON.stringify(value.object));
 					
 					if(value.object.attachments){
-						displayName = (value.object.content != null) ? checkChars(value.object.content) : ''; //gets the user's post
+						displayName = (value.object.content != null) ? countChar(value.object.content) : ''; //gets the user's post
 						attachment = value.object.attachments['0'];
 						
 						if(attachment.displayName){
@@ -219,11 +242,11 @@ if ($client->getAccessToken()) {
 							}
 						}
 					}else{
-						displayName = checkChars(value.object.content);
+						displayName = countChar(value.object.content);
 						objectType = 'status';
 					}
 				}else if(displayName == ''){
-					displayName = " on " + value.actor.displayName + "\'s " + activityType + "<br><br><a href='" + value.object.url + "'>" + checkChars(value.object.content) + "</a>";
+					displayName = " on " + value.actor.displayName + "\'s " + activityType + "<br><br><a href='" + value.object.url + "'>" + countChar(value.object.content) + "</a>";
 	
 					if(value.object.plusoners.totalItems > 0){
 						objectType = 'plusone';
@@ -311,37 +334,40 @@ if ($client->getAccessToken()) {
 </head>
 <body>
 
-<?php
+	<?php
   if(isset($authUrl)) {
   ?>
-	<header><h1>Round Circles</h1></header>
-    <div class='box'> <a class='login' href='<?php print $authUrl ?>'>Connect Me!</a> </div>
-  <?php
+	<header>
+		<h1>Round Circles</h1>
+	</header>
+	<div class='box'>
+		<a class='login' href='&lt;?php print $authUrl ?&gt;'>Connect Me!</a>
+	</div>
+	<?php
   } else {
   ?>
 	<div id="header">
 		<div class="header-wrapper">
 			<div class="header-btn">
-				<a class="header-btn-target" href="#" title="Round Circles">
-					<span class="app-icon"><img src='images/round-circles.png' alt='Round Circles'/></span>
-				</a>
+				<a class="header-btn-target" href="#" title="Round Circles"> <span
+					class="app-icon"><img src='images/round-circles.png'
+						alt='Round Circles' />
+				</span> </a>
 			</div>
 			<ul class="menu">
 				<li><a href="#">menu</a>
 					<div id="search-form">
-						<input type="text" id="query"></input>
-						<a href="#" id="other">Get Others</a>
-					</div>
-				</li>
+						<input type="text" id="query"></input> <a href="#" id="other">Get
+							Others</a>
+					</div></li>
 			</ul>
-			<div id="header-user">
-			</div>
+			<div id="header-user"></div>
 		</div>
 	</div>
 	<div id="other-container"></div>
 	<div id="activity-urls" class="activities"></div>
-	
-  <?php
+
+	<?php
   }
 ?>
 
