@@ -341,7 +341,7 @@ if ($client->getAccessToken()) {
 		<h1>Round Circles</h1>
 	</header>
 	<div class='box'>
-		<a class='login' href='&lt;?php print $authUrl ?&gt;'>Connect Me!</a>
+		<a class='login' href='<?php print $authUrl ?>'>Connect Me!</a>
 	</div>
 	<?php
   } else {
