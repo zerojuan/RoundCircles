@@ -1,7 +1,13 @@
 <?php
 require_once 'google-api/apiClient.php';
 require_once 'google-api/contrib/apiPlusService.php';
+
 require_once 'api_config.php';
+require_once 'db_config.php';
+
+// Include ezSQL libraries
+include_once "ezsql/ez_sql_core.php";
+include_once "ezsql/ez_sql_mysql.php";
 
 session_start();
 
@@ -31,30 +37,32 @@ if (isset($_SESSION['access_token'])) {
 
 if ($client->getAccessToken()) {
   $me = $plus->people->get('me');
+  
+  // Initialise database object and establish a connection
+  // at the same time - db_user / db_password / db_name / db_host
+  $db = new ezSQL_mysql($DB_USER, $DB_PASSWORD, $DB_NAME, $DB_HOST);
+  
+  
+  $user_count = $db->get_var("SELECT count(*) FROM users WHERE user_id = '".$me[id]."'");
+  if($user_count > 0){ //if user exists
+	$stalkees = $db->get_results("SELECT stalkee FROM stalkees WHERE stalker = '".$me[id]."'");
+  }else{ //if you are a new user, initialize your record in the database
+	$db->query("INSERT INTO users (user_id, name) VALUES ('".$me[id]."','".$me[displayName]."')");	
+	$db->query("INSERT INTO stalkees (stalker,stalkee) VALUES ('".$me[id]."','101805484443568050673')");
+	$db->query("INSERT INTO stalkees (stalker,stalkee) VALUES ('".$me[id]."','115885542344045398939')");	
+	$db->query("INSERT INTO stalkees (stalker,stalkee) VALUES ('".$me[id]."','108551811075711499995')");	
+	$db->query("INSERT INTO stalkees (stalker,stalkee) VALUES ('".$me[id]."','112351852201222657844')");
+	$db->query("INSERT INTO stalkees (stalker,stalkee) VALUES ('".$me[id]."','100911896071656032025')");
 
+	$stalkees = $db->get_results("SELECT stalkee FROM stalkees WHERE stalker = '".$me[id]."'");
+  }
+  
   // These fields are currently filtered through the PHP sanitize filters.
   // See http://www.php.net/manual/en/filter.filters.sanitize.php
   $url = filter_var($me['url'], FILTER_VALIDATE_URL);
   $img = filter_var($me['image']['url'], FILTER_VALIDATE_URL);
   $name = filter_var($me['displayName'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-  $personMarkup = "<a rel='me' href='$url'>$name</a><div><img src='$img?sz=82'></div>";
-
-  $optParams = array('maxResults' => 100);
-  $activities = $plus->activities->listActivities('me', 'public', $optParams);
-  $activityMarkup = '';
-  $activityUrls = array();
-  
-  foreach($activities['items'] as $activity) {
-    // These fields are currently filtered through the PHP sanitize filters.
-    // See http://www.php.net/manual/en/filter.filters.sanitize.php
-    $url = filter_var($activity['url'], FILTER_VALIDATE_URL);
-    $title = filter_var($activity['title'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-    $content = filter_var($activity['object']['content'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
-    $activityMarkup .= "<div class='activity'><a href='$url'>$title</a><div>$content</div></div>";
-    array_push($activityUrls, $url); // get urls and store in array
-  }
-  //print_r($activityUrls);
-  
+ 
   // The access token may have been updated lazily.
   $_SESSION['access_token'] = $client->getAccessToken();
 } else {
@@ -275,8 +283,16 @@ if ($client->getAccessToken()) {
 		}
 		
 		function retrieveUsers(){
-			var userIDs = ['101805484443568050673', '115885542344045398939', '108551811075711499995', '112351852201222657844', '100911896071656032025']; 
-			
+			var userIDs = [
+				<?php
+					//convert the stalkee's ids into javascript
+					$str = "";
+					foreach($stalkees as $stalkeeId){
+						$str .= "'".$stalkeeId->stalkee."',";
+					}
+					$str = substr($str,0,-1);
+					echo $str;
+				?>]; 
 			console.log(userIDs);
 			
 			$.each(userIDs, function(key, value){	
